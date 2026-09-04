@@ -16,5 +16,5 @@ class Config:
         self.target = Target(target)
         self.modules = [Modules(module) for module in modules]
         self.ports = ports if ports is not None else []
-        self.wordlist = wordlist
+        self.wordlist = Path(wordlist) if wordlist else None
         self.output = Path(output) if output else None
