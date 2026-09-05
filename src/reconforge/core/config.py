@@ -1,7 +1,6 @@
 from pathlib import Path
 
 # from .enums import EnumType, ScanType
-# from pydantic import BaseModel
 
 
 class ScanConfig:

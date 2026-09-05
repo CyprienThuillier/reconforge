@@ -55,6 +55,5 @@ strict = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
-# pyproject.toml
 [tool.coverage.run]
 omit = ["src/reconforge/cli.py"]
