@@ -1,20 +1,24 @@
 from pathlib import Path
 
-from .enums import Modules
-from .models import Target
+# from .enums import EnumType, ScanType
 
 
-class Config:
+class ScanConfig:
     def __init__(
         self,
         target: str,
-        modules: list[Modules],
-        ports: list[str] | None,
-        wordlist: Path | None,
-        output: Path | None,
+        ports: str | None = None,
+        scan_type: str | None = None,
+        mode: str | None = None,
+        wordlist: Path | None = None,
+        verbose: bool = False,
+        output: Path | None = None,
     ):
-        self.target = Target(target)
-        self.modules = [Modules(module) for module in modules]
-        self.ports = ports if ports is not None else []
-        self.wordlist = Path(wordlist) if wordlist else None
-        self.output = Path(output) if output else None
+
+        self.target = target
+        self.ports = ports
+        self.scan_type = scan_type
+        self.mode = mode
+        self.wordlist = wordlist
+        self.output = output
+        self.verbose = verbose

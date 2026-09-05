@@ -45,9 +45,15 @@ target-version = ["py311"]
 line-length = 100
 target-version = "py311"
 
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["typer.Argument", "typer.Option"]
+
 [tool.mypy]
 python_version = "3.11"
 strict = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.coverage.run]
+omit = ["src/reconforge/cli.py"]
