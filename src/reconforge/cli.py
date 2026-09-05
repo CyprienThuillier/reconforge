@@ -25,7 +25,7 @@ def pscan(
         verbose=verbose,
     )
 
-    #typer.echo(config)
+    typer.echo(config)
 
 
 @app.command()
