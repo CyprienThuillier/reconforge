@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from .enums import Modules
 
-_PORT_RANGE_RE = re.compile(r"^\d+(-\d+)?$")
+ports_range = re.compile(r"^\d+(-\d+)?$")
 
 
 class ScanConfig(BaseModel):
@@ -22,27 +22,29 @@ class ScanConfig(BaseModel):
         try:
             ipaddress.ip_address(value)
             return value
+
         except ValueError:
             pass
-        domain_re = re.compile(
-            r"^(?=.{1,253}$)(?!-)[A-Za-z0-9-]{1,63}(?<!-)" r"(\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))+$"
-        )
-        if not domain_re.match(value):
+
+        domain = re.compile(r"^(?=.{1,253}$)(?!-)[A-Za-z0-9-]{1,63}(?<!-)" r"(\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))+$")
+        if not domain.match(value):
             raise ValueError(f"invalid target: {value!r} is not a valid IP or domain")
         return value
 
     @field_validator("ports")
     @classmethod
     def validate_ports(cls, value: list[str]) -> list[str]:
-        for entry in value:
-            for part in entry.split(","):
-                if not _PORT_RANGE_RE.match(part):
-                    raise ValueError(f"invalid port range syntax: {part!r}")
-                bounds = [int(n) for n in part.split("-")]
+        for val in value:
+            for port in val.split(","):
+                if not ports_range.match(port):
+                    raise ValueError(f"invalid port range syntax: {port!r}")
+
+                bounds = [int(n) for n in port.split("-")]
                 if any(not (1 <= n <= 65535) for n in bounds):
-                    raise ValueError(f"port out of range [1-65535]: {part!r}")
+                    raise ValueError(f"port out of range [1-65535]: {port!r}")
+
                 if len(bounds) == 2 and bounds[0] > bounds[1]:
-                    raise ValueError(f"invalid range order: {part!r}")
+                    raise ValueError(f"invalid range order: {port!r}")
         return value
 
     @field_validator("wordlist")
