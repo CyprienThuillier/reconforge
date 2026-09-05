@@ -26,7 +26,9 @@ class ScanConfig(BaseModel):
         except ValueError:
             pass
 
-        domain = re.compile(r"^(?=.{1,253}$)(?!-)[A-Za-z0-9-]{1,63}(?<!-)" r"(\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))+$")
+        domain = re.compile(
+            r"^(?=.{1,253}$)(?!-)[A-Za-z0-9-]{1,63}(?<!-)" r"(\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))+$"
+        )
         if not domain.match(value):
             raise ValueError(f"invalid target: {value!r} is not a valid IP or domain")
         return value
