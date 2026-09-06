@@ -3,13 +3,14 @@ from pathlib import Path
 import re
 import ipaddress
 
-from reconforge.core.config import ScanConfig
 from reconforge.core.exceptions import (
     InvalidPortRangeError,
     InvalidWordlistError,
     InvalidOutputError,
     InvalidTargetError,
 )
+
+from reconforge.core.config import ScanConfig
 
 # ------ Validation Input ------- #
 
@@ -43,8 +44,23 @@ def validate_target(target: str) -> None:
             raise InvalidTargetError(f"Invalid hostname Label {words!r} in target {target!r}")
 
         
-def validate_port_range(ports: str) -> None: 
-    pass
+def validate_port(ports: str) -> None:
+    if "-" in ports:
+        if "," in ports:
+            raise InvalidPortRangeError(f"Invalid port range format: {ports!r}")
+        port_range = ports.split("-")
+        if len(port_range) != 2:
+            raise InvalidPortRangeError(f"Invalid port range format: {ports!r}")
+        start, end = int(port_range[0]), int(port_range[1])
+        if start < 1 or end > 65535 or start > end:
+            raise InvalidPortRangeError(f"Port range out of bounds: {ports!r}")
+    elif "," in ports:
+        for port in ports.split(","):
+            if not port.isdigit() or not (1 <= int(port) <= 65535):
+                raise InvalidPortRangeError(f"Invalid port number: {port!r} in {ports!r}")
+    else:
+        if not ports.isdigit() or not (1 <= int(ports) <= 65535):
+            raise InvalidPortRangeError(f"Invalid port number: {ports!r}")
 
 
 def validate_wordlist(wordlist: Path) -> None:  
@@ -53,32 +69,3 @@ def validate_wordlist(wordlist: Path) -> None:
 
 def validate_output(output: Path) -> None:  
     pass
-
-
-# ------- Orchestration Fonctions --------- #
-
-
-def validate_pscan_config(config: ScanConfig) -> None:
-
-    validate_target(config.target)
-
-    if config.ports is None:
-        raise InvalidPortRangeError("Port range is required for pscan")
-
-    validate_port_range(config.ports)
-
-    if config.output is not None:
-        validate_output(config.output)
-
-
-def validate_enum_config(config: ScanConfig) -> None:
-
-    validate_target(config.target)
-
-    if config.wordlist is None:
-        raise InvalidWordlistError("Wordlist is required for enum")
-
-    validate_wordlist(config.wordlist)
-
-    if config.output is not None:
-        validate_output(config.output)

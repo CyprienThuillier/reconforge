@@ -57,3 +57,7 @@ def test_scan_config_verbose_defaults_to_false():
 def test_scan_config_verbose_stored_when_true():
     config = ScanConfig(target="example.com", verbose=True)
     assert config.verbose is True
+
+def test_scan_config_ports_formating_with_range():
+    config = ScanConfig(target="example.com", ports="20-25")
+    assert config.ports_formating() == [20, 21, 22, 23, 24, 25]
