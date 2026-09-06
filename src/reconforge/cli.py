@@ -30,8 +30,8 @@ def pscan(
 
 @app.command()
 def enum(
-    target: str = typer.Argument(..., help="Target host or IM"),
-    mode: EnumType = typer.Option(EnumType.SUBDOMAIN, "--mode", "-m", help="subdomains | folders"),
+    target: str = typer.Argument(..., help="Target host or IP"),
+    mode: EnumType = typer.Option(EnumType.SUBDOMAIN, "--mode", "-m", help="subdomains | directories"),
     wordlist: Path = typer.Option(..., "--wordlist", "-w", exists=True, help="Path to wordlist"),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Verbose Output"),
     output: Path | None = typer.Option(None, "--output", "-o", help=" Output file path"),

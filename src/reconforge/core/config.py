@@ -1,6 +1,10 @@
 from pathlib import Path
 
-from reconforge.core.validators import validate_port, validate_target
+from reconforge.core.validators import 
+    validate_port, 
+    validate_target, 
+    validate_wordlist,
+    validate_output,
 
 
 class ScanConfig:
@@ -47,6 +51,35 @@ class ScanConfig:
             scan_type=scan_type,
             mode=mode,
             wordlist=wordlist,
+            verbose=verbose,
+            output=output,
+        )
+
+    @classmethod
+    def enum(
+        cls,
+        target: str,
+        ports: str | None = None,
+        scan_type: str | None = None,
+        mode: str | None = None,
+        wordlist: Path | None = None,
+        verbose: bool = False,
+        output: Path | None = None,
+    ) -> "ScanConfig":
+
+        validate_target(target)
+
+        wordlist_path: Path | None = None
+        if wordlist is not None:
+            validate_wordlist(wordlist)
+            wordlist_path = wordlist
+
+        return cls(
+            target=target,
+            ports=ports,
+            scan_type=scan_type,
+            mode=mode,
+            wordlist=wordlist_path,
             verbose=verbose,
             output=output,
         )
