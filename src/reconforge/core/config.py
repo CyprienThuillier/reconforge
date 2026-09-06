@@ -1,10 +1,6 @@
 from pathlib import Path
 
-from reconforge.core.validators import 
-    validate_port, 
-    validate_target, 
-    validate_wordlist,
-    validate_output,
+from reconforge.core.validators import validate_port, validate_target, validate_wordlist, validate_output
 
 
 class ScanConfig:

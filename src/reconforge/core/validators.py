@@ -68,4 +68,5 @@ def validate_wordlist(wordlist: Path) -> None:
 
 
 def validate_output(output: Path) -> None:  
-    pass
+    pass 
+    
