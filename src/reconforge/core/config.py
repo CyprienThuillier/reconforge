@@ -45,6 +45,11 @@ class ScanConfig:
             validate_port(ports)
             parsed_ports = parse_ports(ports)
 
+        ouput_path: Path | None = None
+        if output is not None:
+            validate_output(output)
+            ouput_path = output
+
         return cls(
             target=target,
             ports=parsed_ports,
@@ -73,6 +78,11 @@ class ScanConfig:
         if wordlist is not None:
             validate_wordlist(wordlist)
             wordlist_path = wordlist
+            
+        ouput_path: Path | None = None
+        if output is not None:
+            validate_output(output)
+            ouput_path = output
 
         return cls(
             target=target,
