@@ -2,6 +2,7 @@ import ipaddress
 import os
 import re
 from pathlib import Path
+from datetime import datetime
 
 from reconforge.core.exceptions import (
     InvalidPortRangeError,
@@ -99,5 +100,20 @@ def validate_wordlist(wordlist: Path) -> None:
         raise InvalidWordlistError(f"Wordlist contain no usable entries: {wordlist!r}")
 
 
-def validate_output(output: Path) -> None:
-    pass
+def validate_output(output: Path | None) -> None:
+    resolved_o = output.expanduser.resolve()
+
+    if resolved_o.is_dir():
+        final_o = resolved_o / "output.log"
+    else:
+        final_o = resolved_o
+
+    if not final_o.parent.exists():
+        raise InvalidOutputError(f"Output directory '{final_o.parent}' does not exist.")
+
+    if not os.access(final_o.parent, os.W_OK):
+        raise InvalidOutputError(f"No write permission on directory '{final_o.parent}'.")
+
+    if final_o.exists():
+        raise InvalidOutputError(f"Output file '{final_o}' already exits.")
+        

@@ -1,10 +1,12 @@
 from pathlib import Path
+from datetime import datetime
 
 from reconforge.core.validators import (
     validate_output,
     validate_port,
     validate_target,
     validate_wordlist,
+    validate_output,
 )
 
 
@@ -49,7 +51,7 @@ class ScanConfig:
         output_path: Path | None = None
         if output is not None:
             validate_output(output)
-            output_path = output
+            output_path = create_output_path(output)
 
         return cls(
             target=target,
@@ -81,7 +83,7 @@ class ScanConfig:
         output_path: Path | None = None
         if output is not None:
             validate_output(output)
-            output_path = output
+            output_path = create_output_path(output)
 
         return cls(
             target=target,
@@ -99,3 +101,11 @@ def parse_ports(ports: str) -> list[int]:
     if "," in ports:
         return [int(port) for port in ports.split(",")]
     return [int(ports)]
+
+
+def create_output_path(output: Path) -> Path:
+    output_path = Path(output).expanduser().resolve()
+    if path.is_dir():
+        filename = f"report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+        return path / filename
+    return path
