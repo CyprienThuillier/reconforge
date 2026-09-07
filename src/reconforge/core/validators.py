@@ -81,7 +81,7 @@ def validate_wordlist(wordlist: Path) -> None:
 
     size = wordlist.stat().st_size
     if size == 0:
-        raise InvalidWordlistError(f"Wordlist is empty: {wordlist!r}")
+        raise InvalidWordlistError(f"Wordlist cannot be empty: {wordlist!r}")
 
     if size > max_wordlist_size_bytes:
         raise InvalidWordlistError(
