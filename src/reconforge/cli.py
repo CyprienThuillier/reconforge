@@ -17,7 +17,7 @@ def pscan(
     output: Path | None = typer.Option(None, "--output", "-o", help=" Output file path"),
 ) -> None:
 
-    config = ScanConfig(
+    config = ScanConfig.port_scan(
         target=target,
         ports=ports,
         scan_type=type.value,
@@ -31,13 +31,15 @@ def pscan(
 @app.command()
 def enum(
     target: str = typer.Argument(..., help="Target host or IP"),
-    mode: EnumType = typer.Option(EnumType.SUBDOMAIN, "--mode", "-m", help="subdomains | directories"),
+    mode: EnumType = typer.Option(
+        EnumType.SUBDOMAIN, "--mode", "-m", help="subdomains | directories"
+    ),
     wordlist: Path = typer.Option(..., "--wordlist", "-w", exists=True, help="Path to wordlist"),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Verbose Output"),
     output: Path | None = typer.Option(None, "--output", "-o", help=" Output file path"),
 ) -> None:
 
-    config = ScanConfig(
+    config = ScanConfig.enum(
         target=target,
         mode=mode.value,
         wordlist=wordlist,

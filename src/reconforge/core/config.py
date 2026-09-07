@@ -1,6 +1,11 @@
 from pathlib import Path
 
-from reconforge.core.validators import validate_port, validate_target, validate_wordlist, validate_output
+from reconforge.core.validators import (
+    validate_output,
+    validate_port,
+    validate_target,
+    validate_wordlist,
+)
 
 
 class ScanConfig:
@@ -50,8 +55,6 @@ class ScanConfig:
             target=target,
             ports=parsed_ports,
             scan_type=scan_type,
-            mode=mode,
-            wordlist=wordlist,
             verbose=verbose,
             output=output_path,
         )
@@ -74,7 +77,7 @@ class ScanConfig:
         if wordlist is not None:
             validate_wordlist(wordlist)
             wordlist_path = wordlist
-            
+
         output_path: Path | None = None
         if output is not None:
             validate_output(output)
@@ -82,8 +85,6 @@ class ScanConfig:
 
         return cls(
             target=target,
-            ports=ports,
-            scan_type=scan_type,
             mode=mode,
             wordlist=wordlist_path,
             verbose=verbose,
