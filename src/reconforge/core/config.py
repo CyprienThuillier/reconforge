@@ -1,12 +1,11 @@
+from datetime import UTC, datetime
 from pathlib import Path
-from datetime import datetime
 
 from reconforge.core.validators import (
     validate_output,
     validate_port,
     validate_target,
     validate_wordlist,
-    validate_output,
 )
 
 
@@ -105,7 +104,7 @@ def parse_ports(ports: str) -> list[int]:
 
 def create_output_path(output: Path) -> Path:
     output_path = Path(output).expanduser().resolve()
-    if path.is_dir():
-        filename = f"report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
-        return path / filename
-    return path
+    if output_path.is_dir():
+        filename = f"report_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}.log"
+        return output_path / filename
+    return output_path

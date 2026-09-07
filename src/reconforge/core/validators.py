@@ -2,9 +2,9 @@ import ipaddress
 import os
 import re
 from pathlib import Path
-from datetime import datetime
 
 from reconforge.core.exceptions import (
+    InvalidOutputError,
     InvalidPortRangeError,
     InvalidTargetError,
     InvalidWordlistError,
@@ -101,7 +101,10 @@ def validate_wordlist(wordlist: Path) -> None:
 
 
 def validate_output(output: Path | None) -> None:
-    resolved_o = output.expanduser.resolve()
+    if output is None:
+        return None
+
+    resolved_o = output.expanduser().resolve()
 
     if resolved_o.is_dir():
         final_o = resolved_o / "output.log"
@@ -116,4 +119,3 @@ def validate_output(output: Path | None) -> None:
 
     if final_o.exists():
         raise InvalidOutputError(f"Output file '{final_o}' already exits.")
-        
