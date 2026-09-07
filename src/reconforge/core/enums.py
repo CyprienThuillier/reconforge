@@ -11,4 +11,4 @@ class ScanType(str, Enum):
 
 class EnumType(str, Enum):
     SUBDOMAIN = "subdomain"
-    FOLDERS = "folders"
+    DIRECTORIES = "directories"

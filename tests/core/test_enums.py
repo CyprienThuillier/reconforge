@@ -28,17 +28,17 @@ def test_scan_type_invalid_value_raises():
 
 def test_enum_type_values():
     assert EnumType.SUBDOMAIN.value == "subdomain"
-    assert EnumType.FOLDERS.value == "folders"
+    assert EnumType.DIRECTORIES.value == "directories"
 
 
 def test_enum_type_is_str_enum():
     assert EnumType.SUBDOMAIN == "subdomain"
-    assert isinstance(EnumType.FOLDERS, str)
+    assert isinstance(EnumType.DIRECTORIES, str)
 
 
 def test_enum_type_from_value():
     assert EnumType("subdomain") is EnumType.SUBDOMAIN
-    assert EnumType("folders") is EnumType.FOLDERS
+    assert EnumType("directories") is EnumType.DIRECTORIES
 
 
 def test_enum_type_invalid_value_raises():
