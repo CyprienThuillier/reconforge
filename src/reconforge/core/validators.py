@@ -102,7 +102,7 @@ def validate_wordlist(wordlist: Path) -> None:
 
 def validate_output(output: Path | None) -> None:
     if output is None:
-        return None
+        return
 
     resolved_o = output.expanduser().resolve()
 
