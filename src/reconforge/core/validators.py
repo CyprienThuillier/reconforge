@@ -10,8 +10,6 @@ from reconforge.core.exceptions import (
     InvalidTargetError,
 )
 
-from reconforge.core.config import ScanConfig
-
 # ------ Validation Input ------- #
 
 hostname_label = re.compile(r"^(?!-)[A-Za-z0-9-]{1,63}(?<!-)$")
@@ -49,11 +47,18 @@ def validate_port(ports: str) -> None:
         if "," in ports:
             raise InvalidPortRangeError(f"Invalid port range format: {ports!r}")
         port_range = ports.split("-")
+
         if len(port_range) != 2:
             raise InvalidPortRangeError(f"Invalid port range format: {ports!r}")
-        start, end = int(port_range[0]), int(port_range[1])
+        start_str, end_str = port_range
+        
+        if not start_str.isdigit() or not end_str.isdigit():
+            raise InvalidPortRangeError(f"Invalid port range format: {ports!r}")
+        start, end = int(start_str), int(end_str)
+
         if start < 1 or end > 65535 or start > end:
             raise InvalidPortRangeError(f"Port range out of bounds: {ports!r}")
+        
     elif "," in ports:
         for port in ports.split(","):
             if not port.isdigit() or not (1 <= int(port) <= 65535):
