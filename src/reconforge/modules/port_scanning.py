@@ -1,4 +1,5 @@
 import asyncio
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
 
@@ -15,6 +16,9 @@ class PortState(str, Enum):
 class PortResult:
     port: int
     state: PortState
+
+
+ProgressCallback = Callable[[PortResult], None]
 
 
 async def scan_port_connect(
@@ -41,13 +45,19 @@ async def scan_ports_connect(
     ports: list[int],
     concurrency: int = DEFAULT_CONCURRENCY,
     timeout: float = DEFAULT_CONNECT_TIMEOUT,
+    on_result: ProgressCallback | None = None,
 ) -> list[PortResult]:
 
     semaphore = asyncio.Semaphore(concurrency)
 
     async def bounded_scan(port: int) -> PortResult:
         async with semaphore:
-            return await scan_port_connect(target, port, timeout)
+            result = await scan_port_connect(target, port, timeout)
+
+        if on_result is not None:
+            on_result(result)
+
+        return result
 
     tasks = [bounded_scan(port) for port in ports]
     return await asyncio.gather(*tasks)

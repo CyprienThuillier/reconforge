@@ -118,3 +118,25 @@ async def test_scan_ports_connect_respects_concurrency_limit(
 
     assert max_concurrent <= 5
     assert max_concurrent > 1
+
+
+@pytest.mark.asyncio
+async def test_scan_ports_connect_calls_on_result_for_each_port(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    async def _fake_scan(
+        target: str, port: int, timeout: float = DEFAULT_CONNECT_TIMEOUT
+    ) -> PortResult:
+        return PortResult(port=port, state=PortState.CLOSED)
+
+    monkeypatch.setattr("reconforge.modules.port_scanning.scan_port_connect", _fake_scan)
+
+    seen: list[int] = []
+
+    def _record(result: PortResult) -> None:
+        seen.append(result.port)
+
+    ports = [22, 80, 443]
+    await scan_ports_connect("127.0.0.1", ports, on_result=_record)
+
+    assert sorted(seen) == sorted(ports)

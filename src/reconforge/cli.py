@@ -1,18 +1,33 @@
 import asyncio
+import time
 from pathlib import Path
 
 import typer
 from rich.console import Console
-from rich.table import Table
 
 from reconforge.core.config import ScanConfig
 from reconforge.core.enums import EnumType, ScanType
 from reconforge.core.exceptions import *
-from reconforge.modules.port_scanning import PortState, scan_ports_connect
+from reconforge.modules.port_scanning import (
+    DEFAULT_CONNECT_TIMEOUT,
+    PortResult,
+    PortState,
+    scan_ports_connect,
+)
+from reconforge.report.console import (
+    create_progress,
+    print_banner,
+    print_results,
+    print_scan_config,
+    print_summary,
+    service_name,
+)
 
 console = Console()
 
 app = typer.Typer(help="Reconforge - reconaissance CLI")
+console = Console()
+err_console = Console(stderr=True)
 
 
 @app.command()
@@ -25,33 +40,62 @@ def pscan(
     ),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Verbose Output"),
     output: Path | None = typer.Option(None, "--output", "-o", help=" Output file path"),
+    timeout: float = typer.Option(
+        DEFAULT_CONNECT_TIMEOUT, "--timeout", min=0.1, help="Per-port timeout in seconds"
+    ),
 ) -> None:
 
-    config = ScanConfig.port_scan(
-        target=target,
-        ports=ports,
-        scan_type=type.value,
-        output=output,
-        verbose=verbose,
-    )
+    try:
+        config = ScanConfig.port_scan(
+            target=target,
+            ports=ports,
+            scan_type=type.value,
+            output=output,
+            verbose=verbose,
+        )
+    except ReconForgeValidationError as error:
+        err_console.print(f"[bold red]Error:[/bold red] {error}")
+        raise typer.Exit(code=1) from error
 
-    if config.ports is None:
-        raise InvalidPortRangeError("Parsed port list is empty")
+    ports_to_scan = config.ports
+    if ports_to_scan is None:
+        err_console.print("[bold red]Error:[/bold red] no ports to scan")
+        raise typer.Exit(code=1)
 
-    results = asyncio.run(scan_ports_connect(config.target, config.ports, concurrency=concurrency))
+    print_banner(console, config.target)
+    if config.verbose:
+        print_scan_config(console, config.target, len(ports_to_scan), concurrency, timeout)
 
-    table = Table(title=f"ReconForge — {config.target}")
-    table.add_column("Port", justify="right")
-    table.add_column("State")
+    start = time.perf_counter()
 
-    for result in results:
-        if result.state == PortState.OPEN:
-            state_display = "[bold green]OPEN[/bold green]"
-        else:
-            state_display = "[dim]closed[/dim]"
-        table.add_row(str(result.port), state_display)
+    try:
+        with create_progress(console) as progress:
+            task_id = progress.add_task(f"Scanning {config.target}", total=len(ports_to_scan))
 
-    console.print(table)
+            def on_result(result: PortResult) -> None:
+                progress.advance(task_id)
+                if config.verbose and result.state == PortState.OPEN:
+                    progress.console.print(
+                        f"[green][+][/green] {result.port}/tcp open  {service_name(result.port)}"
+                    )
+
+            results = asyncio.run(
+                scan_ports_connect(
+                    config.target,
+                    ports_to_scan,
+                    concurrency=concurrency,
+                    timeout=timeout,
+                    on_result=on_result,
+                )
+            )
+    except KeyboardInterrupt:
+        err_console.print("[yellow]Scan interrupted.[/yellow]")
+        raise typer.Exit(code=130) from None
+    duration = time.perf_counter() - start
+
+    console.print()
+    print_results(console, config.target, results)
+    print_summary(console, results, duration, config.verbose, concurrency, timeout)
 
 
 @app.command()
