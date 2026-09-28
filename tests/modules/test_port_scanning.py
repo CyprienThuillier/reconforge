@@ -4,6 +4,7 @@ import socket
 from collections.abc import AsyncIterator
 
 import pytest
+import pytest_asyncio
 
 from reconforge.modules.port_scanning import (
     DEFAULT_CONNECT_TIMEOUT,
@@ -19,7 +20,7 @@ async def _accept_and_close(reader: asyncio.StreamReader, writer: asyncio.Stream
     await writer.wait_closed()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def listening_port() -> AsyncIterator[int]:
     server = await asyncio.start_server(_accept_and_close, "127.0.0.1", 0)
     port = server.sockets[0].getsockname()[1]
