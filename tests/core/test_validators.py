@@ -2,11 +2,20 @@ import pytest
 
 from reconforge.core import validators as validators_module
 from reconforge.core.exceptions import (
+    InvalidPathError,
     InvalidPortRangeError,
     InvalidTargetError,
+    InvalidUrlError,
     InvalidWordlistError,
 )
-from reconforge.core.validators import validate_port, validate_target, validate_wordlist
+from reconforge.core.validators import (
+    normalize_url,
+    validate_path,
+    validate_port,
+    validate_target,
+    validate_url,
+    validate_wordlist,
+)
 
 # --- validate_target ---------------------------------------------------
 
@@ -122,3 +131,70 @@ def test_validate_wordlist_rejects_oversized_file(tmp_path, monkeypatch):
 
     with pytest.raises(InvalidWordlistError):
         validate_wordlist(wordlist)
+
+
+# --- normalize_url ---------------------------------------------------------
+
+
+def test_normalize_url_adds_https_to_bare_host():
+    assert normalize_url("  example.com  ") == "https://example.com"
+
+
+def test_normalize_url_preserves_explicit_scheme_and_port():
+    assert normalize_url("http://example.com:8443") == "http://example.com:8443"
+
+
+def test_normalize_url_rejects_blank_string():
+    with pytest.raises(InvalidUrlError):
+        normalize_url("   ")
+
+
+# --- validate_url ----------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://example.com",
+        "http://example.com",
+        "example.com",
+        "https://example.com/admin?a=1",
+        "https://example.com:8443",
+        "http://127.0.0.1:3000",
+        "http://[::1]:8080",
+    ],
+)
+def test_validate_url_accepts_supported_urls(url):
+    validate_url(url)
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "",
+        "file:///etc/passwd",
+        "ftp://example.com",
+        "https://",
+        "https://-invalid.example.com",
+        "https://user:secret@example.com",
+        "https://example.com:99999",
+        "https://[::1",
+    ],
+)
+def test_validate_url_rejects_unsupported_urls(url):
+    with pytest.raises(InvalidUrlError):
+        validate_url(url)
+
+
+# --- validate_path ---------------------------------------------------------
+
+
+@pytest.mark.parametrize("path", ["/", "/api/v1/users", "/admin?a=1"])
+def test_validate_path_accepts_absolute_paths(path):
+    validate_path(path)
+
+
+@pytest.mark.parametrize("path", ["", "   ", "api/v1", "/\r\nX-Injected: 1", "/api\x00"])
+def test_validate_path_rejects_malformed_paths(path):
+    with pytest.raises(InvalidPathError):
+        validate_path(path)
