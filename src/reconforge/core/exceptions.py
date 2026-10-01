@@ -19,3 +19,15 @@ class InvalidWordlistError(ReconForgeValidationError):
 
 class InvalidOutputError(ReconForgeValidationError):
     """Raised when the output path is not writable (missing/invalid parent dir)."""
+
+
+class InvalidUrlError(ReconForgeValidationError):
+    """Raised when a web target is not a valid http(s) URL."""
+
+
+class InvalidPathError(ReconForgeValidationError):
+    """Raised when an HTTP path to probe is empty or malformed."""
+
+
+class InvalidCveError(ReconForgeValidationError):
+    """Raised when an unknown CVE scanner id is requested."""
