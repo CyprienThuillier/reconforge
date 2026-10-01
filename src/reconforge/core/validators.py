@@ -2,14 +2,11 @@ import ipaddress
 import os
 import re
 from pathlib import Path
-from urllib.parse import urlsplit
 
 from reconforge.core.exceptions import (
     InvalidOutputError,
-    InvalidPathError,
     InvalidPortRangeError,
     InvalidTargetError,
-    InvalidUrlError,
     InvalidWordlistError,
 )
 
@@ -17,9 +14,6 @@ from reconforge.core.exceptions import (
 
 hostname_label = re.compile(r"^(?!-)[A-Za-z0-9-]{1,63}(?<!-)$")
 max_wordlist_size_bytes = 500 * 1024 * 1024
-allowed_url_schemes = ("http", "https")
-default_url_scheme = "https"
-forbidden_path_characters = re.compile(r"[\x00-\x1f\x7f]")
 
 
 def validate_target(target: str) -> None:
@@ -125,54 +119,3 @@ def validate_output(output: Path | None) -> None:
 
     if final_o.exists():
         raise InvalidOutputError(f"Output file '{final_o}' already exits.")
-
-
-def normalize_url(url: str) -> str:
-    candidate = url.strip()
-    if not candidate:
-        raise InvalidUrlError("URL cannot be empty")
-
-    if "://" not in candidate:
-        return f"{default_url_scheme}://{candidate}"
-    return candidate
-
-
-def validate_url(url: str) -> None:
-    normalized = normalize_url(url)
-
-    try:
-        parsed = urlsplit(normalized)
-        hostname = parsed.hostname
-        port = parsed.port
-    except ValueError as error:
-        raise InvalidUrlError(f"Malformed URL: {url!r}") from error
-
-    if parsed.scheme not in allowed_url_schemes:
-        raise InvalidUrlError(f"URL scheme must be one of {'/'.join(allowed_url_schemes)}: {url!r}")
-
-    if not hostname:
-        raise InvalidUrlError(f"URL has no host: {url!r}")
-
-    if parsed.username or parsed.password:
-        raise InvalidUrlError(f"URL must not embed credentials: {url!r}")
-
-    try:
-        validate_target(hostname)
-    except InvalidTargetError as error:
-        raise InvalidUrlError(f"Invalid URL host {hostname!r} in {url!r}") from error
-
-    if port is not None and not (1 <= port <= 65535):
-        raise InvalidUrlError(f"URL port out of bounds: {url!r}")
-
-
-def validate_path(path: str) -> None:
-    candidate = path.strip()
-
-    if not candidate:
-        raise InvalidPathError("Path cannot be empty")
-
-    if not candidate.startswith("/"):
-        raise InvalidPathError(f"Path must start with '/': {path!r}")
-
-    if forbidden_path_characters.search(candidate):
-        raise InvalidPathError(f"Path must not contain control characters: {path!r}")
