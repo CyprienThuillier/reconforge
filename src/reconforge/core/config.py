@@ -1,19 +1,12 @@
-from collections.abc import Sequence
 from datetime import UTC, datetime
 from pathlib import Path
-from urllib.parse import urlsplit
 
 from reconforge.core.validators import (
-    normalize_url,
     validate_output,
-    validate_path,
     validate_port,
     validate_target,
-    validate_url,
     validate_wordlist,
 )
-
-DEFAULT_PROBE_PATHS = ("/",)
 
 
 class ScanConfig:
@@ -24,8 +17,6 @@ class ScanConfig:
         scan_type: str | None = None,
         mode: str | None = None,
         wordlist: Path | None = None,
-        cves: list[str] | None = None,
-        paths: list[str] | None = None,
         verbose: bool = False,
         output: Path | None = None,
     ):
@@ -34,8 +25,6 @@ class ScanConfig:
         self.scan_type = scan_type
         self.mode = mode
         self.wordlist = wordlist
-        self.cves = cves
-        self.paths = paths
         self.output = output
         self.verbose = verbose
 
@@ -103,32 +92,6 @@ class ScanConfig:
             output=output_path,
         )
 
-    @classmethod
-    def cve_scan(
-        cls,
-        target: str,
-        cves: Sequence[str] | None = None,
-        paths: str | Sequence[str] | None = None,
-        verbose: bool = False,
-        output: Path | None = None,
-    ) -> "ScanConfig":
-        validate_url(target)
-
-        output_path: Path | None = None
-        if output is not None:
-            validate_output(output)
-            output_path = create_output_path(output)
-
-        normalized_target = normalize_url(target)
-
-        return cls(
-            target=normalized_target,
-            cves=list(cves or []),
-            paths=parse_paths(paths, normalized_target),
-            verbose=verbose,
-            output=output_path,
-        )
-
 
 def parse_ports(ports: str) -> list[int]:
     if "-" in ports:
@@ -137,30 +100,6 @@ def parse_ports(ports: str) -> list[int]:
     if "," in ports:
         return [int(port) for port in ports.split(",")]
     return [int(ports)]
-
-
-def default_path_for(target: str) -> str:
-    path = urlsplit(target).path
-    return "" if path not in ("", "/") else "/"
-
-
-def parse_paths(paths: str | Sequence[str] | None, target: str | None = None) -> list[str]:
-    candidates: Sequence[str] = (
-        () if paths is None else (paths.split(",") if isinstance(paths, str) else list(paths))
-    )
-
-    parsed: list[str] = []
-    for candidate in candidates:
-        path = candidate.strip()
-        if not path:
-            continue
-        normalized = path if path.startswith("/") else f"/{path}"
-        validate_path(normalized)
-        parsed.append(normalized)
-
-    if parsed:
-        return parsed
-    return [default_path_for(target)] if target is not None else list(DEFAULT_PROBE_PATHS)
 
 
 def create_output_path(output: Path) -> Path:

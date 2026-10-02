@@ -30,7 +30,7 @@ contracted pentests). Built by two cybersecurity students as part of their techn
 
 - [ ] Subdomain enumeration
 - [ ] Port scanning and service fingerprinting
-- [x] Known vulnerability (CVE) detection on web targets — CVE-2025-55182 (React2Shell)
+- [ ] Known vulnerability (CVE) detection on identified services
 - [ ] Report generation (Markdown / HTML / JSON)
 - [ ] Parallelized execution (asyncio)
 
@@ -40,8 +40,7 @@ contracted pentests). Built by two cybersecurity students as part of their techn
 reconforge/
 ├── src/reconforge/
 │   ├── core/          # Orchestrator, scan engine
-│   ├── modules/        # One module per technique (subdomain_enum, port_scan, cve...)
-│   │   └── cve/        # One submodule per CVE (base contract + registry)
+│   ├── modules/        # One module per technique (subdomain_enum, port_scan, cve_match...)
 │   ├── report/          # Report generation
 │   └── cli.py            # CLI entry point (Typer/Click)
 ├── tests/
@@ -64,25 +63,6 @@ pip install -e ".[dev]"
 
 ```bash
 reconforge scan --target example.com --modules subdomains,ports,cve --output report.md
-```
-
-### Port scanning
-
-```bash
-reconforge pscan example.com --ports 1-1000
-reconforge pscan example.com --ports 80,443,8080 --concurrency 500 -v
-```
-
-### CVE detection
-
-CVE detection takes a URL, not a hostname. Probes are non-destructive: a finding means the target
-runs a vulnerable build, never that it has been exploited. With no `--cve`, every registered scanner
-runs.
-
-```bash
-reconforge cve https://example.com
-reconforge cve https://example.com -C react2shell -P / -P /_next -v
-reconforge cve --list
 ```
 
 ## Roadmap
