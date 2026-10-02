@@ -4,8 +4,14 @@ import socket
 import pytest
 from rich.console import Console
 
+from reconforge.core.enums import ScanType
 from reconforge.modules.port_scanning import PortResult, PortState
-from reconforge.report.console import build_results_table, print_summary, service_name
+from reconforge.report.console import (
+    build_results_table,
+    print_banner,
+    print_summary,
+    service_name,
+)
 
 
 def _results() -> list[PortResult]:
@@ -56,3 +62,14 @@ def test_print_summary_verbose_adds_statistics() -> None:
     print_summary(console, _results(), duration=2.0, verbose=True, concurrency=500, timeout=1.0)
 
     assert "ports/s" in buffer.getvalue()
+
+
+def test_print_banner_shows_target_and_scan_type() -> None:
+    buffer = io.StringIO()
+    console = Console(file=buffer, width=120)
+
+    print_banner(console, "example.com", ScanType.CONNECT)
+
+    output = buffer.getvalue()
+    assert "example.com" in output
+    assert "connect scan" in output

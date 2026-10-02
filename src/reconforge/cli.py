@@ -65,7 +65,7 @@ def pscan(
         err_console.print("[bold red]Error:[/bold red] no ports to scan")
         raise typer.Exit(code=1)
 
-    print_banner(console, config.target)
+    print_banner(console, config.target, type)
     if config.verbose:
         print_scan_config(console, config.target, len(ports_to_scan), concurrency, timeout)
 
