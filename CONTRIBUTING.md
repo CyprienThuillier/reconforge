@@ -3,7 +3,8 @@
 ## Git workflow
 
 1. Never commit directly to `main` (protected branch).
-2. Create one branch per task: `feature/feature-name`, `fix/bug-name`, `docs/topic`.
+2. Create one branch per task: `feature/feature-name`, `fix/bug-name`, `docs/topic`,
+   `refactor/topic`.
 3. Open a Pull Request as soon as work starts (as *draft* if unfinished) for mutual visibility.
 4. CI (lint + tests) must pass before merging.
 5. At least one review from the other collaborator is required before merging.

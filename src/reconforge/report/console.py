@@ -16,6 +16,7 @@ from rich.progress import (
 )
 from rich.table import Table
 
+from reconforge.core.enums import ScanType
 from reconforge.modules.port_scanning import PortResult, PortState
 
 
@@ -26,10 +27,10 @@ def service_name(port: int) -> str:
         return "unknown"
 
 
-def print_banner(console: Console, target: str) -> None:
+def print_banner(console: Console, target: str, scan_type: ScanType) -> None:
     console.print(
         Panel.fit(
-            "[bold cyan]ReconForge[/bold cyan] · TCP connect scan\n"
+            f"[bold cyan]ReconForge[/bold cyan] · {scan_type.value} scan\n"
             f"Target: [bold]{target}[/bold]",
             border_style="cyan",
         )

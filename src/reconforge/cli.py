@@ -12,7 +12,8 @@ from reconforge.modules.port_scanning import (
     DEFAULT_CONNECT_TIMEOUT,
     PortResult,
     PortState,
-    scan_ports_connect,
+    get_probe,
+    scan_ports,
 )
 from reconforge.report.console import (
     create_progress,
@@ -34,7 +35,7 @@ err_console = Console(stderr=True)
 def pscan(
     target: str = typer.Argument(..., help="Target host or IP"),
     ports: str = typer.Option("1-1000", "--ports", "-p", help="Port range, ex: 1-10000 or 80,443"),
-    type: ScanType = typer.Option(ScanType.TCP, "--type", "-t", help="Scan technique"),
+    type: ScanType = typer.Option(ScanType.CONNECT, "--type", "-t", help="Scan technique"),
     concurrency: int = typer.Option(
         500, "--concurrency", "-c", help="Max simultaneous connections"
     ),
@@ -53,6 +54,8 @@ def pscan(
             output=output,
             verbose=verbose,
         )
+        probe = get_probe(type)
+
     except ReconForgeValidationError as error:
         err_console.print(f"[bold red]Error:[/bold red] {error}")
         raise typer.Exit(code=1) from error
@@ -62,7 +65,7 @@ def pscan(
         err_console.print("[bold red]Error:[/bold red] no ports to scan")
         raise typer.Exit(code=1)
 
-    print_banner(console, config.target)
+    print_banner(console, config.target, type)
     if config.verbose:
         print_scan_config(console, config.target, len(ports_to_scan), concurrency, timeout)
 
@@ -80,7 +83,8 @@ def pscan(
                     )
 
             results = asyncio.run(
-                scan_ports_connect(
+                scan_ports(
+                    probe,
                     config.target,
                     ports_to_scan,
                     concurrency=concurrency,
