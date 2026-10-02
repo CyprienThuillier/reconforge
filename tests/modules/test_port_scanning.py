@@ -80,7 +80,7 @@ async def test_scan_ports_connect_preserves_input_order(
         await asyncio.sleep(0.01 * (port % 3))
         return PortResult(port=port, state=PortState.OPEN)
 
-    monkeypatch.setattr("reconforge.modules.port_scanning.scan_port_connect", _fake_scan)
+    monkeypatch.setattr("reconforge.modules.port_scanning.connect.scan_port_connect", _fake_scan)
 
     ports = [80, 443, 22, 8080, 21]
     results = await scan_ports_connect("127.0.0.1", ports)
@@ -111,7 +111,7 @@ async def test_scan_ports_connect_respects_concurrency_limit(
 
         return PortResult(port=port, state=PortState.OPEN)
 
-    monkeypatch.setattr("reconforge.modules.port_scanning.scan_port_connect", _fake_scan)
+    monkeypatch.setattr("reconforge.modules.port_scanning.connect.scan_port_connect", _fake_scan)
 
     ports = list(range(1, 21))
     await scan_ports_connect("127.0.0.1", ports, concurrency=5)
@@ -129,7 +129,7 @@ async def test_scan_ports_connect_calls_on_result_for_each_port(
     ) -> PortResult:
         return PortResult(port=port, state=PortState.CLOSED)
 
-    monkeypatch.setattr("reconforge.modules.port_scanning.scan_port_connect", _fake_scan)
+    monkeypatch.setattr("reconforge.modules.port_scanning.connect.scan_port_connect", _fake_scan)
 
     seen: list[int] = []
 

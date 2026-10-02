@@ -1,24 +1,12 @@
 import asyncio
-from collections.abc import Callable
-from dataclasses import dataclass
-from enum import Enum
 
-DEFAULT_CONNECT_TIMEOUT = 1.0
-DEFAULT_CONCURRENCY = 500
-
-
-class PortState(str, Enum):
-    OPEN = "open"
-    CLOSED = "closed"
-
-
-@dataclass(frozen=True)
-class PortResult:
-    port: int
-    state: PortState
-
-
-ProgressCallback = Callable[[PortResult], None]
+from reconforge.modules.port_scanning.models import (
+    DEFAULT_CONCURRENCY,
+    DEFAULT_CONNECT_TIMEOUT,
+    PortResult,
+    PortState,
+    ProgressCallback,
+)
 
 
 async def scan_port_connect(
