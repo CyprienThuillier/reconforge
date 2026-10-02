@@ -1,6 +1,8 @@
 from reconforge.modules.port_scanning.connect import (
     scan_port_connect,
-    scan_ports_connect,
+)
+from reconforge.modules.port_scanning.engine import (
+    scan_ports,
 )
 from reconforge.modules.port_scanning.models import (
     DEFAULT_CONCURRENCY,
@@ -19,5 +21,5 @@ __all__ = [
     "PortState",
     "ProgressCallback",
     "scan_port_connect",
-    "scan_ports_connect",
+    "scan_ports",
 ]

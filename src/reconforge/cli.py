@@ -12,7 +12,8 @@ from reconforge.modules.port_scanning import (
     DEFAULT_CONNECT_TIMEOUT,
     PortResult,
     PortState,
-    scan_ports_connect,
+    scan_port_connect,
+    scan_ports,
 )
 from reconforge.report.console import (
     create_progress,
@@ -80,7 +81,8 @@ def pscan(
                     )
 
             results = asyncio.run(
-                scan_ports_connect(
+                scan_ports(
+                    scan_port_connect,
                     config.target,
                     ports_to_scan,
                     concurrency=concurrency,
