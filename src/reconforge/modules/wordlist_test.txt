@@ -1,0 +1,25 @@
+# --- existants (A) ---
+www
+mail
+docs
+maps
+drive
+# --- AAAA seul (voir note) ---
+ipv6
+# --- inexistants ---
+zzzqqq123
+blablabla
+notarealsubdomain
+# --- syntaxe valide, probablement inexistants ---
+dev-api
+test_api
+123
+# --- casse et espaces (doivent être normalisés) ---
+WWW
+   mail   
+# --- invalides (doivent être rejetés) ---
+-start
+end-
+bad.label
+bad label
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
