@@ -19,3 +19,7 @@ class InvalidWordlistError(ReconForgeValidationError):
 
 class InvalidOutputError(ReconForgeValidationError):
     """Raised when the output path is not writable (missing/invalid parent dir)."""
+
+
+class UnsupportedScanTypeError(ReconForgeValidationError):
+    """Raised when the requested scan type has no implementation yet."""

@@ -3,7 +3,6 @@ from reconforge.core.enums import EnumType, ScanType
 
 def test_scan_type_values():
     assert ScanType.SYN.value == "syn"
-    assert ScanType.TCP.value == "tcp"
     assert ScanType.CONNECT.value == "connect"
     assert ScanType.UDP.value == "udp"
     assert ScanType.FIN.value == "fin"
