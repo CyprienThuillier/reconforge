@@ -43,7 +43,9 @@ def test_build_enum_table_has_one_row_per_record_type_of_found_names() -> None:
 def test_print_enum_results_reports_when_nothing_found() -> None:
     console, buffer = _console()
 
-    print_enum_results(console, "example.com", [SubdomainResult("a.example.com", DnsStatus.NOT_FOUND)])
+    print_enum_results(
+        console, "example.com", [SubdomainResult("a.example.com", DnsStatus.NOT_FOUND)]
+    )
 
     assert "No subdomains found" in buffer.getvalue()
 
