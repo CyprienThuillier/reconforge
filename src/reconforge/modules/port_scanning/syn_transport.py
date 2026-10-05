@@ -2,7 +2,7 @@ import asyncio
 import threading
 from collections.abc import Callable
 
-from scapy.all import IP, TCP, AsyncSniffer, send  # type: ignore[attr-defined]
+from scapy.all import IP, TCP, AsyncSniffer, conf, send  # type: ignore[attr-defined]
 
 from reconforge.modules.port_scanning.models import PortState
 
@@ -24,6 +24,7 @@ class SynTransport:
             prn=self._handle_packet,
             started_callback=self.ready_event.set,
             store=False,
+            iface=conf.loopback_name if self.target_ip.startswith("127.") else None,
         )
 
     def _handle_packet(self, pkt: IP) -> None:
