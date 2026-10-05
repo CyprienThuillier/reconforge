@@ -23,3 +23,11 @@ class InvalidOutputError(ReconForgeValidationError):
 
 class UnsupportedScanTypeError(ReconForgeValidationError):
     """Raised when the requested scan type has no implementation yet."""
+
+
+class InsufficientPrivilegesError(ReconForgeValidationError):
+    """Raised when the user lacks privileges (e.g. root) for a specific scan type."""
+
+
+class TargetResolutionError(ReconForgeValidationError):
+    """Raised when target resolution fails (e.g. IPv6 not supported yet)."""
