@@ -60,34 +60,12 @@ state yet; if one does (e.g. a scapy socket), the `PortProbe` contract can be sw
 class-based interface without changing the engine. Known but unimplemented scan types raise
 `UnsupportedScanTypeError`.
 
-### ADR-005: Subdomain enumeration follows the port-scanning layout (async, injected probe)
-**Context**: the first subdomain enumeration prototype was a single synchronous script (config
-class, resolver helpers, wordlist reader, scan loop and ad-hoc tests in one file). It resolved
-names one by one, so a large wordlist was slow, and it could not report progress or share any
-orchestration with the port scanner.
-**Decision**: split `modules/subdomain_enum/` the same way as `modules/port_scanning/` (ADR-004):
-`models.py` (shared types, `DnsStatus`, `SubdomainResult`), `wordlist.py` (label validation and
-name building), `resolver.py` (dnspython resolution with retry, wrapped in a
-`make_dns_probe(...)` factory returning a `SubdomainProbe`) and `engine.py` (generic
-`enumerate_subdomains(probe, names, ...)` with a semaphore and a progress callback). DNS I/O uses
-`dns.asyncresolver`, consistent with ADR-002. Console rendering lives in
-`report/enum_console.py` and reuses `create_progress` from `report/console.py`.
-**Consequence**: tests inject fake probes or a scripted fake resolver instead of hitting the
-network; the CLI gets a progress bar and live "[+]" output like `pscan`. Adds `dnspython` as a
-dependency. Shared rendering helpers (progress bar, summary grid) could later move to a common
-`report/` module if a third command needs them.### ADR-005: Subdomain enumeration follows the port-scanning layout (async, injected probe)
-**Context**: the first subdomain enumeration prototype was a single synchronous script (config
-class, resolver helpers, wordlist reader, scan loop and ad-hoc tests in one file). It resolved
-names one by one, so a large wordlist was slow, and it could not report progress or share any
-orchestration with the port scanner.
-**Decision**: split `modules/subdomain_enum/` the same way as `modules/port_scanning/` (ADR-004):
-`models.py` (shared types, `DnsStatus`, `SubdomainResult`), `wordlist.py` (label validation and
-name building), `resolver.py` (dnspython resolution with retry, wrapped in a
-`make_dns_probe(...)` factory returning a `SubdomainProbe`) and `engine.py` (generic
-`enumerate_subdomains(probe, names, ...)` with a semaphore and a progress callback). DNS I/O uses
-`dns.asyncresolver`, consistent with ADR-002. Console rendering lives in
-`report/enum_console.py` and reuses `create_progress` from `report/console.py`.
-**Consequence**: tests inject fake probes or a scripted fake resolver instead of hitting the
-network; the CLI gets a progress bar and live "[+]" output like `pscan`. Adds `dnspython` as a
-dependency. Shared rendering helpers (progress bar, summary grid) could later move to a common
-`report/` module if a third command needs them.
+### ADR-005: Context manager based Sessions for Scan Lifecycle (SYN scan)
+**Context**: While the `connect` scan is simple and requires no setup, a `syn` scan using Scapy raw sockets requires spawning a background packet sniffer before the first packet is sent, and joining it after the last.
+**Decision**: We introduced the concept of `ScanSession` (`AbstractAsyncContextManager[PortProbe]`) in `models.py`. The `registry.py` now maps a `ScanType` to a factory function returning a session context manager. The engine uses this context manager to wrap the scan execution. The `syn_session` sets up the `SynTransport`, ensures root privileges, starts the `AsyncSniffer`, yields the `scan_port` probe function, and finally stops the sniffer.
+**Consequence**: Lifecycle management is handled correctly for any complex scanner requiring setup and teardown without leaking background threads or needing dirty global variables. This also simplifies our integration testing since mock transports can easily be substituted.
+
+### ADR-006: Subdomain enumeration follows the port-scanning layout (async, injected probe)
+**Context**: the first subdomain enumeration prototype was a single synchronous script (config class, resolver helpers, wordlist reader, scan loop and ad-hoc tests in one file). It resolved names one by one, so a large wordlist was slow, and it could not report progress or share any orchestration with the port scanner.
+**Decision**: split `modules/subdomain_enum/` the same way as `modules/port_scanning/` (ADR-004): `models.py` (shared types, `DnsStatus`, `SubdomainResult`), `wordlist.py` (label validation and name building), `resolver.py` (dnspython resolution with retry, wrapped in a `make_dns_probe(...)` factory returning a `SubdomainProbe`) and `engine.py` (generic `enumerate_subdomains(probe, names, ...)` with a semaphore and a progress callback). DNS I/O uses `dns.asyncresolver`, consistent with ADR-002. Console rendering lives in `report/enum_console.py` and reuses `create_progress` from `report/console.py`.
+**Consequence**: tests inject fake probes or a scripted fake resolver instead of hitting the network; the CLI gets a progress bar and live "[+]" output like `pscan`. Adds `dnspython` as a dependency. Shared rendering helpers (progress bar, summary grid) could later move to a common `report/` module if a third command needs them.

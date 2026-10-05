@@ -1,4 +1,5 @@
 from collections.abc import Awaitable, Callable
+from contextlib import AbstractAsyncContextManager
 from dataclasses import dataclass
 from enum import Enum
 
@@ -9,6 +10,7 @@ DEFAULT_CONCURRENCY = 500
 class PortState(str, Enum):
     OPEN = "open"
     CLOSED = "closed"
+    FILTERED = "filtered"
 
 
 @dataclass(frozen=True)
@@ -19,3 +21,4 @@ class PortResult:
 
 ProgressCallback = Callable[[PortResult], None]
 PortProbe = Callable[[str, int, float], Awaitable[PortResult]]
+ScanSession = AbstractAsyncContextManager[PortProbe]
