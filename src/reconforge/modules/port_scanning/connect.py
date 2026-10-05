@@ -32,5 +32,5 @@ async def scan_port_connect(
 
 
 @asynccontextmanager
-async def connect_session() -> AsyncIterator[PortProbe]:
+async def connect_session(target: str) -> AsyncIterator[PortProbe]:
     yield scan_port_connect

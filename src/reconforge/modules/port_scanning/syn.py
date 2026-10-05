@@ -1,9 +1,10 @@
 import asyncio
+import socket
 from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
 from typing import Protocol
 
-from reconforge.core.exceptions import InsufficientPrivilegesError
+from reconforge.core.exceptions import InsufficientPrivilegesError, TargetResolutionError
 from reconforge.modules.port_scanning.models import PortProbe, PortResult, PortState
 
 
@@ -42,7 +43,7 @@ class SynScanner:
 
 
 @asynccontextmanager
-async def syn_session() -> AsyncIterator[PortProbe]:
+async def syn_session(target: str) -> AsyncIterator[PortProbe]:
     import os
 
     from reconforge.modules.port_scanning.syn_transport import SynTransport
@@ -50,7 +51,12 @@ async def syn_session() -> AsyncIterator[PortProbe]:
     if os.geteuid() != 0:
         raise InsufficientPrivilegesError("SYN scan requires root privileges (or CAP_NET_RAW).")
 
-    transport = SynTransport()
+    try:
+        target_ip = socket.gethostbyname(target)
+    except socket.gaierror as error:
+        raise TargetResolutionError(f"Cannot resolve target {target!r}") from error
+
+    transport = SynTransport(target_ip)
     scanner = SynScanner(transport)
 
     transport.start_sniffer(scanner._sniffer_callback)
