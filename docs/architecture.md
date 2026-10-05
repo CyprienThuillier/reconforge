@@ -59,3 +59,8 @@ monkeypatching module paths. Functions were preferred over classes because no te
 state yet; if one does (e.g. a scapy socket), the `PortProbe` contract can be swapped for a
 class-based interface without changing the engine. Known but unimplemented scan types raise
 `UnsupportedScanTypeError`.
+
+### ADR-005: Context manager based Sessions for Scan Lifecycle (SYN scan)
+**Context**: While the `connect` scan is simple and requires no setup, a `syn` scan using Scapy raw sockets requires spawning a background packet sniffer before the first packet is sent, and joining it after the last.
+**Decision**: We introduced the concept of `ScanSession` (`AbstractAsyncContextManager[PortProbe]`) in `models.py`. The `registry.py` now maps a `ScanType` to a factory function returning a session context manager. The engine uses this context manager to wrap the scan execution. The `syn_session` sets up the `SynTransport`, ensures root privileges, starts the `AsyncSniffer`, yields the `scan_port` probe function, and finally stops the sniffer.
+**Consequence**: Lifecycle management is handled correctly for any complex scanner requiring setup and teardown without leaking background threads or needing dirty global variables. This also simplifies our integration testing since mock transports can easily be substituted.
