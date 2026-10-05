@@ -113,7 +113,7 @@ def pscan(
                     )
 
             async def run_scan() -> list[PortResult]:
-                async with session_factory() as probe:
+                async with session_factory(config.target) as probe:
                     return await scan_ports(
                         probe,
                         config.target,

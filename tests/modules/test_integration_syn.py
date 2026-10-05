@@ -28,7 +28,7 @@ async def test_integration_syn_scan(listening_port: int) -> None:
     if os.geteuid() != 0:
         pytest.skip("Integration tests require root privileges")
 
-    async with syn_session() as probe:
+    async with syn_session("127.0.0.1") as probe:
         result = await probe("127.0.0.1", listening_port, 1.0)
 
     assert result.state == PortState.OPEN

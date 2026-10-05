@@ -6,13 +6,13 @@ from reconforge.modules.port_scanning.connect import connect_session
 from reconforge.modules.port_scanning.models import ScanSession
 from reconforge.modules.port_scanning.syn import syn_session
 
-SESSIONS: dict[ScanType, Callable[[], ScanSession]] = {
+SESSIONS: dict[ScanType, Callable[[str], ScanSession]] = {
     ScanType.CONNECT: connect_session,
     ScanType.SYN: syn_session,
 }
 
 
-def get_session(scan_type: ScanType) -> Callable[[], ScanSession]:
+def get_session(scan_type: ScanType) -> Callable[[str], ScanSession]:
     if scan_type not in SESSIONS:
         raise UnsupportedScanTypeError(f"Scan type {scan_type.value!r} is not implemented yet")
     return SESSIONS[scan_type]

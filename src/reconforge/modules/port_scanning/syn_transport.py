@@ -1,19 +1,21 @@
 import asyncio
+import socket
 import threading
 from collections.abc import Callable
 
-from scapy.all import IP, TCP, AsyncSniffer, conf, send  # type: ignore[attr-defined]
+from scapy.all import IP, TCP, AsyncSniffer, conf, raw  # type: ignore[attr-defined]
 
 from reconforge.modules.port_scanning.models import PortState
 
 
 class SynTransport:
-    def __init__(self) -> None:
-        self.target_ip = "127.0.0.1"  # Need real resolution
+    def __init__(self, target_ip: str) -> None:
+        self.target_ip = target_ip
         self.source_port = 54321
         self.seq = 1000
         self.ready_event = threading.Event()
         self.callback: Callable[[int, PortState], None] | None = None
+        self.sock: socket.socket | None = None  # ouvert dans start_sniffer (nécessite root)
 
         self.base_pkt = IP(dst=self.target_ip) / TCP(
             sport=self.source_port, seq=self.seq, flags="S"
@@ -38,6 +40,7 @@ class SynTransport:
 
     def start_sniffer(self, callback: Callable[[int, PortState], None]) -> None:
         self.callback = callback
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
         self.sniffer.start()
 
     async def wait_ready(self) -> None:
@@ -45,10 +48,14 @@ class SynTransport:
             await asyncio.sleep(0.01)
 
     def send_syn(self, dport: int) -> None:
+        if self.sock is None:
+            raise RuntimeError("Sniffer must be started before sending packets")
         pkt = self.base_pkt.copy()
         pkt[TCP].dport = dport
-        send(pkt, verbose=False)
+        self.sock.sendto(raw(pkt), (self.target_ip, 0))
 
     def stop(self) -> None:
         self.sniffer.stop()
         self.sniffer.join()
+        if self.sock is not None:
+            self.sock.close()
