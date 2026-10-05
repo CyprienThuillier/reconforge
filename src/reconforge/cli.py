@@ -12,7 +12,7 @@ from reconforge.modules.port_scanning import (
     DEFAULT_CONNECT_TIMEOUT,
     PortResult,
     PortState,
-    get_probe,
+    get_session,
     scan_ports,
 )
 from reconforge.report.console import (
@@ -54,7 +54,7 @@ def pscan(
             output=output,
             verbose=verbose,
         )
-        probe = get_probe(type)
+        session_factory = get_session(type)
 
     except ReconForgeValidationError as error:
         err_console.print(f"[bold red]Error:[/bold red] {error}")
@@ -82,16 +82,18 @@ def pscan(
                         f"[green][+][/green] {result.port}/tcp open  {service_name(result.port)}"
                     )
 
-            results = asyncio.run(
-                scan_ports(
-                    probe,
-                    config.target,
-                    ports_to_scan,
-                    concurrency=concurrency,
-                    timeout=timeout,
-                    on_result=on_result,
-                )
-            )
+            async def run_scan() -> list[PortResult]:
+                async with session_factory() as probe:
+                    return await scan_ports(
+                        probe,
+                        config.target,
+                        ports_to_scan,
+                        concurrency=concurrency,
+                        timeout=timeout,
+                        on_result=on_result,
+                    )
+
+            results = asyncio.run(run_scan())
     except KeyboardInterrupt:
         err_console.print("[yellow]Scan interrupted.[/yellow]")
         raise typer.Exit(code=130) from None

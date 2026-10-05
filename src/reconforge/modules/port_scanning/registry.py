@@ -1,14 +1,16 @@
+from collections.abc import Callable
+
 from reconforge.core.enums import ScanType
 from reconforge.core.exceptions import UnsupportedScanTypeError
-from reconforge.modules.port_scanning.connect import scan_port_connect
-from reconforge.modules.port_scanning.models import PortProbe
+from reconforge.modules.port_scanning.connect import connect_session
+from reconforge.modules.port_scanning.models import ScanSession
 
-SCANNERS: dict[ScanType, PortProbe] = {
-    ScanType.CONNECT: scan_port_connect,
+SESSIONS: dict[ScanType, Callable[[], ScanSession]] = {
+    ScanType.CONNECT: connect_session,
 }
 
 
-def get_probe(scan_type: ScanType) -> PortProbe:
-    if scan_type not in SCANNERS:
+def get_session(scan_type: ScanType) -> Callable[[], ScanSession]:
+    if scan_type not in SESSIONS:
         raise UnsupportedScanTypeError(f"Scan type {scan_type.value!r} is not implemented yet")
-    return SCANNERS[scan_type]
+    return SESSIONS[scan_type]

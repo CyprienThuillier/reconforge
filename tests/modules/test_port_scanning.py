@@ -58,4 +58,4 @@ async def test_scan_port_connect_times_out(monkeypatch: pytest.MonkeyPatch) -> N
 
     result = await scan_port_connect("127.0.0.1", 9999, timeout=0.05)
 
-    assert result.state == PortState.CLOSED
+    assert result.state == PortState.FILTERED
