@@ -1,0 +1,56 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check tag matches package version
+        run: |
+          PKG_VERSION=$(python -c "import tomllib;print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
+          if [ "v$PKG_VERSION" != "${GITHUB_REF_NAME}" ]; then
+            echo "Tag ${GITHUB_REF_NAME} != pyproject version v$PKG_VERSION"; exit 1
+          fi
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install . pyinstaller
+
+      - name: Build standalone binary
+        run: |
+          pyinstaller --onefile --name reconforge \
+            --collect-submodules scapy \
+            --collect-submodules dns \
+            --collect-submodules rich \
+            packaging/entrypoint.py
+
+      - name: Smoke test
+        run: |
+          ./dist/reconforge --help
+          ./dist/reconforge pscan 127.0.0.1 -t connect -p 22,80
+
+      - name: Package and checksum
+        run: |
+          mv dist/reconforge reconforge-linux-x86_64
+          sha256sum reconforge-linux-x86_64 > reconforge-linux-x86_64.sha256
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            reconforge-linux-x86_64
+            reconforge-linux-x86_64.sha256
+          generate_release_notes: true
