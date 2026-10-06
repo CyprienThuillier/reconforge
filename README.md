@@ -57,12 +57,27 @@ git clone https://github.com/CyprienThuillier/reconforge.git
 cd reconforge
 python3 -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
+
+# (Optional) To run reconforge with sudo without specifying the full virtual environment path:
+sudo ln -sf "$(pwd)/.venv/bin/reconforge" /usr/local/bin/reconforge
 ```
 
 ## Usage
 
+### Port Scanning
+Run a TCP SYN scan (requires root privileges):
 ```bash
-reconforge scan --target example.com --modules subdomains,ports,cve --output report.md
+sudo reconforge pscan example.com -t syn -p 1-1000
+```
+Run a standard TCP connect scan:
+```bash
+reconforge pscan example.com -t connect -p 80,443
+```
+
+### Subdomain Enumeration
+Run subdomain enumeration with a wordlist:
+```bash
+reconforge enum example.com -m subdomain -w wordlists/subdomains.txt
 ```
 
 ## Roadmap
