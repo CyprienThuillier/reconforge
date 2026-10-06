@@ -124,6 +124,11 @@ def pscan(
                     )
 
             results = asyncio.run(run_scan())
+
+    except (InsufficientPrivilegesError, TargetResolutionError) as error:
+        err_console.print(f"[bold red]Error:[/bold red] {error}")
+        raise typer.Exit(code=1)
+
     except KeyboardInterrupt:
         err_console.print("[yellow]Scan interrupted.[/yellow]")
         raise typer.Exit(code=130) from None
