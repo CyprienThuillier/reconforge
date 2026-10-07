@@ -12,6 +12,7 @@
 - [About](#about)
 - [Features](#features)
 - [Architecture](#architecture)
+- [Release](#release)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Roadmap](#roadmap)
@@ -28,8 +29,8 @@ contracted pentests). Built by two cybersecurity students as part of their techn
 
 ## Features
 
-- [ ] Subdomain enumeration
-- [ ] Port scanning and service fingerprinting
+- [x] Subdomain enumeration
+- [x] Port scanning and service fingerprinting
 - [ ] Known vulnerability (CVE) detection on identified services
 - [ ] Report generation (Markdown / HTML / JSON)
 - [ ] Parallelized execution (asyncio)
@@ -49,6 +50,42 @@ reconforge/
 ```
 
 See [docs/architecture.md](docs/architecture.md) for the detailed design decisions.
+
+## Release
+
+> ⚠️ **Alpha version**: ReconForge is still under active development. `v0.1.0` is a pre-release: expect bugs and interface changes.
+
+The latest release provides a standalone executable for Linux (x86_64), requiring neither a repository clone nor a Python installation.
+
+| Version | Platform | Download |
+|---------|----------|----------|
+| `v0.1.0` (alpha) | Linux x86_64 | [reconforge-linux-x86_64](https://github.com/CyprienThuillier/reconforge/releases/download/v0.1.0/reconforge-linux-x86_64) |
+
+### Installing from the release
+
+```bash
+# 1. Download the executable
+wget https://github.com/CyprienThuillier/reconforge/releases/download/v0.1.0/reconforge-linux-x86_64
+
+# 2. Make it executable
+chmod +x reconforge-linux-x86_64
+
+# 3. Install it into your PATH
+sudo mv reconforge-linux-x86_64 /usr/local/bin/reconforge
+```
+
+Then check that the installation works:
+
+```bash
+reconforge --help
+```
+
+### Release or install from source?
+
+- **Release (binary)**: to quickly try the tool without setting up a Python environment.
+- **Source**: to contribute, or to follow the latest changes on the `main` branch (see [Installation](#installation)).
+
+Full release notes are available on the [releases page](https://github.com/CyprienThuillier/reconforge/releases).
 
 ## Installation
 
@@ -96,8 +133,9 @@ This tool is intended solely for testing against targets you are explicitly auth
 
 ## Authors
 
-- Cyprien Thuillier — [GitHub](https://github.com/CyprienThuillier) — cybersecurity student
-- Raphael Blanc — [GitHub](https://github.com/RaphaelBlanc) — cybersecurity student
+- Cyprien Thuillier - [GitHub](https://github.com/CyprienThuillier) - cybersecurity student
+- Raphael Blanc - [GitHub](https://github.com/RaphaelBlanc) - cybersecurity student
+- Hugo Cassabois - [GitHub](https://github.com/endelf) - cybersecurity student
 
 ## License
 
