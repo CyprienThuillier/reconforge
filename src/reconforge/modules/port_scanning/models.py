@@ -11,6 +11,7 @@ class PortState(str, Enum):
     OPEN = "open"
     CLOSED = "closed"
     FILTERED = "filtered"
+    OPEN_FILTERED = "open|filtered"
 
 
 @dataclass(frozen=True)

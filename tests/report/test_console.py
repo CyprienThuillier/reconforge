@@ -73,3 +73,29 @@ def test_print_banner_shows_target_and_scan_type() -> None:
     output = buffer.getvalue()
     assert "example.com" in output
     assert "connect scan" in output
+
+
+def test_build_results_table_includes_open_filtered() -> None:
+    results = [
+        PortResult(port=22, state=PortState.OPEN),
+        PortResult(port=80, state=PortState.OPEN_FILTERED),
+        PortResult(port=443, state=PortState.CLOSED),
+    ]
+    table = build_results_table("example.com", results)
+    assert table.row_count == 2
+
+
+def test_print_summary_reports_open_filtered() -> None:
+    results = [
+        PortResult(port=22, state=PortState.OPEN),
+        PortResult(port=80, state=PortState.OPEN_FILTERED),
+        PortResult(port=443, state=PortState.CLOSED),
+    ]
+    buffer = io.StringIO()
+    console = Console(file=buffer, width=120)
+
+    print_summary(console, results, duration=1.0, verbose=True, concurrency=500, timeout=1.0)
+    output = buffer.getvalue()
+    assert "1 open" in output
+    assert "1 open|filtered" in output
+    assert "1 closed/filtered" in output

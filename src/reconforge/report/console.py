@@ -81,11 +81,20 @@ def build_results_table(target: str, results: Sequence[PortResult]) -> Table:
                 "[bold green]open[/bold green]",
                 service_name(result.port),
             )
+        elif result.state == PortState.OPEN_FILTERED:
+            table.add_row(
+                str(result.port),
+                "tcp",
+                "[bold yellow]open|filtered[/bold yellow]",
+                service_name(result.port),
+            )
     return table
 
 
 def print_results(console: Console, target: str, results: Sequence[PortResult]) -> None:
-    open_count = sum(1 for result in results if result.state == PortState.OPEN)
+    open_count = sum(
+        1 for result in results if result.state in (PortState.OPEN, PortState.OPEN_FILTERED)
+    )
 
     if open_count == 0:
         console.print("[yellow]No open ports found.[/yellow]")
@@ -104,11 +113,16 @@ def print_summary(
 ) -> None:
     total = len(results)
     open_count = sum(1 for result in results if result.state == PortState.OPEN)
-    closed_count = total - open_count
+    open_filtered_count = sum(1 for result in results if result.state == PortState.OPEN_FILTERED)
+    closed_count = total - open_count - open_filtered_count
+
+    parts = [f"[green]{open_count} open[/green]"]
+    if open_filtered_count > 0:
+        parts.append(f"[yellow]{open_filtered_count} open|filtered[/yellow]")
+    parts.append(f"{closed_count} closed/filtered")
 
     console.print(
-        f"[bold]Scan complete[/bold] — [green]{open_count} open[/green], "
-        f"{closed_count} closed/filtered · {total} ports in {duration:.2f}s"
+        f"[bold]Scan complete[/bold] — {', '.join(parts)} · {total} ports in {duration:.2f}s"
     )
 
     if not verbose:
@@ -124,6 +138,8 @@ def print_summary(
     grid.add_column()
     grid.add_row("Ports scanned", str(total))
     grid.add_row("Open", f"[green]{open_count}[/green]")
+    if open_filtered_count > 0:
+        grid.add_row("Open|filtered", f"[yellow]{open_filtered_count}[/yellow]")
     grid.add_row("Closed/filtered", str(closed_count))
     grid.add_row("Duration", f"{duration:.2f}s")
     grid.add_row("Rate", f"{rate:.0f} ports/s")

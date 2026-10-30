@@ -4,11 +4,19 @@ from reconforge.core.enums import ScanType
 from reconforge.core.exceptions import UnsupportedScanTypeError
 from reconforge.modules.port_scanning.connect import connect_session
 from reconforge.modules.port_scanning.models import ScanSession
+from reconforge.modules.port_scanning.stealth import (
+    fin_session,
+    null_session,
+    xmas_session,
+)
 from reconforge.modules.port_scanning.syn import syn_session
 
 SESSIONS: dict[ScanType, Callable[[str], ScanSession]] = {
     ScanType.CONNECT: connect_session,
     ScanType.SYN: syn_session,
+    ScanType.FIN: fin_session,
+    ScanType.NULL: null_session,
+    ScanType.XMAS: xmas_session,
 }
 
 

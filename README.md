@@ -106,6 +106,12 @@ Run a TCP SYN scan (requires root privileges):
 ```bash
 sudo reconforge pscan example.com -t syn -p 1-1000
 ```
+Run stealth scans (FIN, NULL, XMAS — requires root privileges):
+```bash
+sudo reconforge pscan example.com -t fin -p 1-1000
+sudo reconforge pscan example.com -t null -p 1-1000
+sudo reconforge pscan example.com -t xmas -p 1-1000
+```
 Run a standard TCP connect scan:
 ```bash
 reconforge pscan example.com -t connect -p 80,443
