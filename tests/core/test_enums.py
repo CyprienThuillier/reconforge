@@ -6,16 +6,23 @@ def test_scan_type_values():
     assert ScanType.CONNECT.value == "connect"
     assert ScanType.UDP.value == "udp"
     assert ScanType.FIN.value == "fin"
+    assert ScanType.NULL.value == "null"
+    assert ScanType.XMAS.value == "xmas"
 
 
 def test_scan_type_is_str_enum():
     assert ScanType.SYN == "syn"
+    assert ScanType.NULL == "null"
+    assert ScanType.XMAS == "xmas"
     assert isinstance(ScanType.SYN, str)
 
 
 def test_scan_type_from_value():
     assert ScanType("syn") is ScanType.SYN
     assert ScanType("udp") is ScanType.UDP
+    assert ScanType("fin") is ScanType.FIN
+    assert ScanType("null") is ScanType.NULL
+    assert ScanType("xmas") is ScanType.XMAS
 
 
 def test_scan_type_invalid_value_raises():

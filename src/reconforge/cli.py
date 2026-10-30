@@ -107,9 +107,10 @@ def pscan(
 
             def on_result(result: PortResult) -> None:
                 progress.advance(task_id)
-                if config.verbose and result.state == PortState.OPEN:
+                if config.verbose and result.state in (PortState.OPEN, PortState.OPEN_FILTERED):
+                    state_str = "open" if result.state == PortState.OPEN else "open|filtered"
                     progress.console.print(
-                        f"[green][+][/green] {result.port}/tcp open  {service_name(result.port)}"
+                        f"[green][+][/green] {result.port}/tcp {state_str}  {service_name(result.port)}"
                     )
 
             async def run_scan() -> list[PortResult]:

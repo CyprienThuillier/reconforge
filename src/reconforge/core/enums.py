@@ -6,6 +6,8 @@ class ScanType(str, Enum):
     CONNECT = "connect"
     UDP = "udp"
     FIN = "fin"
+    NULL = "null"
+    XMAS = "xmas"
 
 
 class EnumType(str, Enum):
